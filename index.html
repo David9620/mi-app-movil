@@ -1,0 +1,80 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Lista de tareas</title>
+    <link href="https://cdn.jsdelivr.net/npm/tailwindcss@2.2.19/dist/tailwind.min.css" rel="stylesheet">
+    <style>
+        body {
+            background-color: #121212;
+            color: #ffffff;
+            font-family: Arial, sans-serif;
+        }
+        .task-item {
+            @apply rounded-lg border-2 border-gray-600 p-4 mb-2 hover:bg-gray-800 transition duration-300 ease-in-out;
+        }
+        .task-item.completed {
+            @apply line-through text-gray-500;
+        }
+        .dark-mode {
+            @apply bg-gray-900 text-gray-300;
+        }
+    </style>
+</head>
+<body class="dark-mode">
+    <div class="container mx-auto p-4">
+        <h1 class="text-3xl font-bold mb-4">Lista de tareas</h1>
+        <form id="task-form" class="mb-4">
+            <input type="text" id="task-input" placeholder="Añadir tarea" class="border-2 border-gray-600 p-2 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500" required>
+            <button type="submit" class="bg-blue-500 text-white py-2 px-4 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500">Añadir</button>
+        </form>
+        <ul id="task-list" class="space-y-4">
+            <!-- Tareas se añadirán aquí -->
+        </ul>
+    </div>
+    <script>
+        const taskForm = document.getElementById('task-form');
+        const taskInput = document.getElementById('task-input');
+        const taskList = document.getElementById('task-list');
+        let tasks = JSON.parse(localStorage.getItem('tasks')) || [];
+        function renderTasks() {
+            taskList.innerHTML = '';
+            tasks.forEach((task, index) => {
+                const taskItem = document.createElement('li');
+                taskItem.classList.add('task-item', task.completed ? 'completed' : '');
+                taskItem.innerHTML = `
+                    <span>${task.text}</span>
+                    <button class="ml-4 bg-green-500 text-white py-1 px-2 rounded-lg focus:outline-none focus:ring-2 focus:ring-green-500" onclick="toggleTask(${index})">Completado</button>
+                    <button class="ml-2 bg-red-500 text-white py-1 px-2 rounded-lg focus:outline-none focus:ring-2 focus:ring-red-500" onclick="deleteTask(${index})">Eliminar</button>
+                `;
+                taskList.appendChild(taskItem);
+            });
+        }
+        function addTask(text) {
+            tasks.push({ text, completed: false });
+            localStorage.setItem('tasks', JSON.stringify(tasks));
+            renderTasks();
+        }
+        function toggleTask(index) {
+            tasks[index].completed = !tasks[index].completed;
+            localStorage.setItem('tasks', JSON.stringify(tasks));
+            renderTasks();
+        }
+        function deleteTask(index) {
+            tasks.splice(index, 1);
+            localStorage.setItem('tasks', JSON.stringify(tasks));
+            renderTasks();
+        }
+        taskForm.addEventListener('submit', (event) => {
+            event.preventDefault();
+            const text = taskInput.value.trim();
+            if (text !== '') {
+                addTask(text);
+                taskInput.value = '';
+            }
+        });
+        renderTasks();
+    </script>
+</body>
+</html>
